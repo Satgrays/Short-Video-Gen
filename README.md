@@ -1,4 +1,3 @@
-```markdown
 # Brainrot Generator
 
 Automated short-form vertical video generator with AI-powered script generation, text-to-speech, and synchronized subtitles.
