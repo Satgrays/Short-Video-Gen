@@ -1,3 +1,7 @@
+"""
+main.py
+"""
+
 import argparse
 import json
 import os
@@ -26,7 +30,6 @@ def generate_route(args):
     video_title = args.video_title
     project_path = create_project_dir(video_title)
     
-    # Get system input from args or fallback to config
     system_input = args.system_input or CONFIG.get("fallbacks", {}).get("system_prompt")
     if not system_input:
         print("No system prompt provided and no fallback found in config.")
@@ -34,10 +37,10 @@ def generate_route(args):
 
     details = {
         "video_title": video_title,
-        "system_input": system_input,  # Use the resolved system_input
+        "system_input": system_input,
         "user_input": args.user_input,
-        "script_model": CONFIG.get("openai_settings", {}).get("script_model", "gpt-4o"),
-        "audio_provider": CONFIG.get("audio_settings", {}).get("provider", "elevenlabs")
+        "script_model": CONFIG.get("script_settings", {}).get("model", "llama-3.3-70b-versatile"),
+        "audio_provider": "edge"
     }
     save_details(project_path, details)
     
@@ -48,7 +51,7 @@ def generate_route(args):
     sc = ScriptController()
     cc = CreationController()
     
-    # Generate the script.
+    # Generate the script
     script = sc.generate_script(system_input, args.user_input, details["script_model"], script_path)
     if script is None:
         print("Failed to generate script.")
@@ -102,7 +105,7 @@ def transcript_route(args):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Video Creation Tool with script generation and transcript-based video assembly"
+        description="Video Creation Tool with Groq AI and ElevenLabs"
     )
     subparsers = parser.add_subparsers(dest='command', help='Sub-commands')
     
@@ -111,9 +114,9 @@ def parse_args():
     generate_parser.add_argument("--system_input", type=str, required=False,
                         help="System prompt for script generation. If not provided, the fallback from config will be used.")
     generate_parser.add_argument("--user_input", type=str, required=True,
-                        help="User input (e.g. reddit post text) for script generation")
+                        help="User input for script generation")
     
-    transcript_parser = subparsers.add_parser('transcript', help='Generate video using an existing audio file (transcript generation only).')
+    transcript_parser = subparsers.add_parser('transcript', help='Generate video using an existing audio file.')
     transcript_parser.add_argument("--video_title", type=str, required=True, help="Title of the video")
     transcript_parser.add_argument("--audio_path", type=str, required=True, help="Path to the existing audio file (mp3 format)")
     
@@ -129,4 +132,4 @@ def main():
         print("Please specify a valid command ('generate' or 'transcript').")
 
 if __name__ == "__main__":
-    main() 
+    main()
